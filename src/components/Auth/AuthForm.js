@@ -4,52 +4,62 @@ import classes from "./AuthForm.module.css";
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [isLoad, setIsLoad] = useState(false);  
+  const [isLoad, setIsLoad] = useState(false);
   const emailInputRef = useRef();
   const passwordInputRef = useRef();
 
   const submitHandler = (e) => {
-
     e.preventDefault();
     const enteredEmail = emailInputRef.current.value;
     const enteredPassword = passwordInputRef.current.value;
-    console.log(enteredEmail, enteredPassword)
 
+    setIsLoad((prevState) => !prevState);
+    let url;
     if (isLogin) {
+      url ="https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDAYWCRWOhOv8s1a7-ECHFaeykSUPgWveI";
+      //..
     } else {
-      setIsLoad((prevState)=> !prevState)
-      fetch(
-        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDAYWCRWOhOv8s1a7-ECHFaeykSUPgWveI",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            email: enteredEmail,
-            password: enteredPassword,
-            returnSecureToken: true,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      ).then((res) => {
-        if (res.ok) {
-          //....
-          
-          setIsLoad((prevState)=> !prevState)
-          
-        } else {
-          setIsLoad((prevState)=> !prevState)
-          return res.json().then((data) => {      
-          let errorMessage = 'Authentication failed!'
-          if(data && data.error && data.error.message){
-            errorMessage = data.error.message
-          }
-          alert(errorMessage)
-          });
-        }
-      });
+      url =
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDAYWCRWOhOv8s1a7-ECHFaeykSUPgWveI";
     }
+
+
+    fetch(url,{
+      method: "POST",
+      body: JSON.stringify({
+        email: enteredEmail,
+        password: enteredPassword,
+        returnSecureToken: true,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).then((res) => {
+      if (res.ok) {
+        setIsLoad((prevState) => !prevState);
+        return res.json();
+
+        
+      } else {
+        setIsLoad((prevState) => !prevState);
+        return res.json().then((data) => {
+          let errorMessage = "Authentication failed!";
+          if (data && data.error && data.error.message) {
+            errorMessage = data.error.message;
+          }
+          throw new Error(errorMessage)
+        });
+      }
+    }).then((data)=>{
+      console.log(data)
+    })
+    .catch((err)=>{
+      alert(err.message)
+    })
+
   };
+
+
 
   const switchAuthModeHandler = () => {
     setIsLogin((prevState) => !prevState);
@@ -74,7 +84,7 @@ const AuthForm = () => {
         </div>
         <div className={classes.actions}>
           <button>{isLogin ? "Login" : "Create Acount"}</button>
-          {isLoad && <p style={{color: "red"}}>Loading...</p>}
+          {isLoad && <p style={{ color: "red" }}>Loading...</p>}
           <button
             type="button"
             className={classes.toggle}
