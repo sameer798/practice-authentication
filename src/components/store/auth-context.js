@@ -1,4 +1,6 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useEffect } from "react";
+import { useHistory } from "react-router-dom";
+
 
 const AuthContext = createContext({
     token: "",
@@ -9,9 +11,32 @@ const AuthContext = createContext({
 
  
 export const AuthContextProvider = (props)=>{
+    const history = useHistory()
     const initialToken = localStorage.getItem('token')
    const [token, setToken] = useState(initialToken)
     const userIsLoggedIn = !!token;
+
+    useEffect(() => {
+      let logoutTimer;
+      if(token){
+       logoutTimer = setTimeout(()=>{
+        autoLogoutHandler();
+        }, 5000)
+      }
+    
+      return () => {
+        if(logoutTimer){
+            clearTimeout(logoutTimer)
+        }
+      }
+    }, [token])
+    
+
+    const autoLogoutHandler = () =>{
+        localStorage.removeItem('token');
+        setToken(null);
+        history.push('/auth')
+    }
 
     const loginHandler = (token) => {
         setToken(token)
