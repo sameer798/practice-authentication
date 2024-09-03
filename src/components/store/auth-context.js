@@ -21,7 +21,7 @@ export const AuthContextProvider = (props)=>{
       if(token){
        logoutTimer = setTimeout(()=>{
         autoLogoutHandler();
-        }, 5000)
+        },5*60* 5000)
       }
     
       return () => {
